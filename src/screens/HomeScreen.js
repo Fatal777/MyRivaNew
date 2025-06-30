@@ -12,10 +12,31 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 const { width } = Dimensions.get('window');
+const Tab = createBottomTabNavigator();
 
-const HomeScreen = ({ navigation }) => {
+// Placeholder components for tabs
+const HistoryTab = () => (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <Text>History Screen</Text>
+  </View>
+);
+
+const ProfileTab = () => (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <Text>Profile Screen</Text>
+  </View>
+);
+
+const SettingsTab = () => (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <Text>Settings Screen</Text>
+  </View>
+);
+
+const HomeContent = ({ navigation }) => {
   const [showTour, setShowTour] = useState(true);
   const fadeAnim = useState(new Animated.Value(0))[0];
   const slideAnim = useState(new Animated.Value(50))[0];
@@ -55,9 +76,7 @@ const HomeScreen = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FEFEFE" />
-      
+    <View style={{ flex: 1 }}>
       {/* Header */}
       <LinearGradient colors={['#FEFEFE', '#9AC1F0']} style={styles.header}>
         <View style={styles.headerContent}>
@@ -71,11 +90,17 @@ const HomeScreen = ({ navigation }) => {
           </View>
           
           <View style={styles.headerRight}>
-            <TouchableOpacity style={styles.notificationButton}>
+            <TouchableOpacity 
+              style={styles.notificationButton}
+              onPress={() => navigation.navigate('Notifications')}
+            >
               <Icon name="notifications-outline" size={24} color="#000000" />
               <View style={styles.notificationBadge} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.profileButton}>
+            <TouchableOpacity 
+              style={styles.profileButton}
+              onPress={() => navigation.navigate('Profile')}
+            >
               <LinearGradient colors={['#FC55CA', '#9AC1F0']} style={styles.profileGradient}>
                 <Text style={styles.profileText}>SA</Text>
               </LinearGradient>
@@ -137,7 +162,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Book Your Ride</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('RidesList')}>
               <Text style={styles.sectionAction}>View All</Text>
             </TouchableOpacity>
           </View>
@@ -148,21 +173,21 @@ const HomeScreen = ({ navigation }) => {
               title="Car Ride"
               subtitle="Comfortable & Fast"
               gradient={['#000000', '#333333']}
-              onPress={() => navigation.navigate('RideBooking')}
+              onPress={() => navigation.navigate('RideBooking', { rideType: 'car' })}
             />
             <RideCard
               icon="bicycle"
               title="Auto Ride"
               subtitle="Quick & Affordable"
               gradient={['#FC55CA', '#9AC1F0']}
-              onPress={() => navigation.navigate('RideBooking')}
+              onPress={() => navigation.navigate('RideBooking', { rideType: 'auto' })}
             />
             <RideCard
               icon="bicycle-outline"
               title="Bike Ride"
               subtitle="Eco-friendly"
               gradient={['#9AC1F0', '#FC55CA']}
-              onPress={() => navigation.navigate('RideBooking')}
+              onPress={() => navigation.navigate('RideBooking', { rideType: 'bike' })}
             />
             <RideCard
               icon="apps"
@@ -178,7 +203,11 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Recent Activity</Text>
           
-          <TouchableOpacity style={styles.recentRideCard} activeOpacity={0.9}>
+          <TouchableOpacity 
+            style={styles.recentRideCard} 
+            activeOpacity={0.9}
+            onPress={() => navigation.navigate('RideDetails', { rideId: '123' })}
+          >
             <View style={styles.recentRideIconContainer}>
               <LinearGradient colors={['#9AC1F0', '#FC55CA']} style={styles.recentRideIcon}>
                 <Icon name="car-sport" size={20} color="#FEFEFE" />
@@ -208,7 +237,11 @@ const HomeScreen = ({ navigation }) => {
           </TouchableOpacity>
 
           {/* Additional Recent Ride */}
-          <TouchableOpacity style={styles.recentRideCard} activeOpacity={0.9}>
+          <TouchableOpacity 
+            style={styles.recentRideCard} 
+            activeOpacity={0.9}
+            onPress={() => navigation.navigate('RideDetails', { rideId: '456' })}
+          >
             <View style={styles.recentRideIconContainer}>
               <LinearGradient colors={['#FC55CA', '#9AC1F0']} style={styles.recentRideIcon}>
                 <Icon name="bicycle" size={20} color="#FEFEFE" />
@@ -252,30 +285,76 @@ const HomeScreen = ({ navigation }) => {
 
         <View style={styles.bottomPadding} />
       </ScrollView>
-
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={[styles.navItem, styles.navItemActive]}>
-          <Icon name="home" size={24} color="#FC55CA" />
-          <Text style={[styles.navText, styles.navTextActive]}>Home</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.navItem}>
-          <Icon name="time-outline" size={24} color="#666" />
-          <Text style={styles.navText}>History</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.navItem}>
-          <Icon name="person-outline" size={24} color="#666" />
-          <Text style={styles.navText}>Profile</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.navItem}>
-          <Icon name="settings-outline" size={24} color="#666" />
-          <Text style={styles.navText}>Settings</Text>
-        </TouchableOpacity>
-      </View>
     </View>
+  );
+};
+
+const HomeScreen = ({ navigation }) => {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        tabBarActiveTintColor: '#FC55CA',
+        tabBarInactiveTintColor: '#666',
+        tabBarStyle: {
+          backgroundColor: '#FEFEFE',
+          borderTopWidth: 1,
+          borderTopColor: '#f0f0f0',
+          paddingVertical: 8,
+          height: 60,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '500',
+          marginTop: 4,
+        },
+        headerShown: false,
+      }}
+    >
+      <Tab.Screen 
+        name="MainHome" 
+        options={{
+          tabBarLabel: 'Home',
+          tabBarIcon: ({ color }) => (
+            <Icon name="home" size={24} color={color} />
+          ),
+        }}
+      >
+        {() => <HomeContent navigation={navigation} />}
+      </Tab.Screen>
+      
+      <Tab.Screen 
+        name="History" 
+        component={HistoryTab}
+        options={{
+          tabBarLabel: 'History',
+          tabBarIcon: ({ color }) => (
+            <Icon name="time-outline" size={24} color={color} />
+          ),
+        }}
+      />
+      
+      <Tab.Screen 
+        name="Profile" 
+        component={ProfileTab}
+        options={{
+          tabBarLabel: 'Profile',
+          tabBarIcon: ({ color }) => (
+            <Icon name="person-outline" size={24} color={color} />
+          ),
+        }}
+      />
+      
+      <Tab.Screen 
+        name="Settings" 
+        component={SettingsTab}
+        options={{
+          tabBarLabel: 'Settings',
+          tabBarIcon: ({ color }) => (
+            <Icon name="settings-outline" size={24} color={color} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
   );
 };
 
@@ -587,33 +666,6 @@ const styles = StyleSheet.create({
   },
   bottomPadding: {
     height: 100,
-  },
-  bottomNav: {
-    flexDirection: 'row',
-    backgroundColor: '#FEFEFE',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-  },
-  navItem: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  navItemActive: {
-    backgroundColor: '#F8F0FF',
-    borderRadius: 15,
-  },
-  navText: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
-    fontWeight: '500',
-  },
-  navTextActive: {
-    color: '#FC55CA',
-    fontWeight: '600',
   },
 });
 

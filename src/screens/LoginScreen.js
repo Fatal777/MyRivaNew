@@ -14,10 +14,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import PropTypes from 'prop-types';
+import LinearGradient from 'react-native-linear-gradient';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const { width, height } = Dimensions.get('window');
 
-function LoginScreen({ navigation }) {
+function LoginScreen({ navigation, setIsLoggedIn }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -65,9 +67,7 @@ function LoginScreen({ navigation }) {
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
-      Alert.alert('Success', 'Login successful!');
-      // You can add navigation here if needed
-      // navigation.navigate('Home');
+      setIsLoggedIn(true);
     } catch (error) {
       Alert.alert('Error', 'Login failed. Please try again.');
       console.error('Login error:', error);
@@ -89,24 +89,30 @@ function LoginScreen({ navigation }) {
   };
 
   const handleSignUp = () => {
-    // navigation.navigate('SignUp');
     Alert.alert('Sign Up', 'Navigate to sign up screen');
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+    <LinearGradient 
+      colors={['#1A001A', '#330033', '#4D004D']} 
+      style={styles.container}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+    >
+      <StatusBar barStyle="light-content" backgroundColor="#1A001A" />
       <KeyboardAvoidingView style={styles.keyboardView} behavior="padding">
-        <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-          
+        <ScrollView 
+          contentContainerStyle={styles.scrollContainer} 
+          showsVerticalScrollIndicator={false}
+        >
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>Log in to MyFitness</Text>
+            <Text style={styles.title}>Welcome to MyRiva</Text>
+            <Text style={styles.subtitle}>Women-only ride sharing</Text>
           </View>
 
           {/* Form Container */}
           <View style={styles.formContainer}>
-            
             {/* Email Input */}
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Email Address</Text>
@@ -146,7 +152,11 @@ function LoginScreen({ navigation }) {
                   onPress={() => setIsPasswordVisible(!isPasswordVisible)}
                   disabled={isLoading}
                 >
-                  <Text style={styles.eyeText}>{isPasswordVisible ? '🙈' : '👁️'}</Text>
+                  <Icon 
+                    name={isPasswordVisible ? 'eye-off' : 'eye'} 
+                    size={20} 
+                    color="#A0A0A0" 
+                  />
                 </TouchableOpacity>
               </View>
               {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
@@ -189,6 +199,7 @@ function LoginScreen({ navigation }) {
               disabled={isLoading}
               activeOpacity={0.8}
             >
+              <Icon name="logo-google" size={20} color="#FFFFFF" style={styles.socialIcon} />
               <Text style={styles.socialButtonText}>Continue with Google</Text>
             </TouchableOpacity>
 
@@ -198,6 +209,7 @@ function LoginScreen({ navigation }) {
               disabled={isLoading}
               activeOpacity={0.8}
             >
+              <Icon name="logo-facebook" size={20} color="#FFFFFF" style={styles.socialIcon} />
               <Text style={styles.socialButtonText}>Continue with Facebook</Text>
             </TouchableOpacity>
 
@@ -208,18 +220,16 @@ function LoginScreen({ navigation }) {
                 <Text style={styles.signUpLink}>Sign Up</Text>
               </TouchableOpacity>
             </View>
-
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   keyboardView: {
     flex: 1,
@@ -227,17 +237,23 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     paddingHorizontal: 24,
-    paddingVertical: 20,
+    paddingVertical: 40,
   },
   header: {
     alignItems: 'center',
-    marginTop: height * 0.08,
+    marginTop: height * 0.05,
     marginBottom: 40,
   },
   title: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#1A1A1A',
+    color: '#FFFFFF',
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#D8BFD8',
+    marginTop: 8,
     textAlign: 'center',
   },
   formContainer: {
@@ -250,16 +266,16 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333333',
+    color: '#D8BFD8',
     marginBottom: 8,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#E5E5E5',
+    borderWidth: 1,
+    borderColor: '#4D004D',
     borderRadius: 12,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     paddingHorizontal: 16,
     height: 56,
   },
@@ -269,14 +285,11 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     fontSize: 16,
-    color: '#1A1A1A',
+    color: '#FFFFFF',
     paddingVertical: 0,
   },
   eyeButton: {
     padding: 8,
-  },
-  eyeText: {
-    fontSize: 18,
   },
   errorText: {
     color: '#FF6B6B',
@@ -289,25 +302,25 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   forgotPasswordText: {
-    color: '#007AFF',
+    color: '#D8BFD8',
     fontSize: 16,
     fontWeight: '600',
   },
   loginButton: {
-    backgroundColor: '#00BCD4',
+    backgroundColor: '#8A2BE2',
     borderRadius: 12,
     height: 56,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 24,
     elevation: 2,
-    shadowColor: '#00BCD4',
+    shadowColor: '#8A2BE2',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
   },
   loginButtonDisabled: {
-    backgroundColor: '#B0BEC5',
+    backgroundColor: '#4B0082',
     elevation: 0,
     shadowOpacity: 0,
   },
@@ -324,10 +337,10 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E5E5E5',
+    backgroundColor: 'rgba(216, 191, 216, 0.3)',
   },
   dividerText: {
-    color: '#777777',
+    color: '#D8BFD8',
     fontSize: 16,
     marginHorizontal: 16,
     fontWeight: '500',
@@ -338,20 +351,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
-    borderWidth: 2,
+    borderWidth: 1,
+    flexDirection: 'row',
   },
   googleButton: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#E5E5E5',
+    backgroundColor: 'rgba(234, 67, 53, 0.2)',
+    borderColor: 'rgba(234, 67, 53, 0.5)',
   },
   facebookButton: {
-    backgroundColor: '#1877F2',
-    borderColor: '#1877F2',
+    backgroundColor: 'rgba(24, 119, 242, 0.2)',
+    borderColor: 'rgba(24, 119, 242, 0.5)',
+  },
+  socialIcon: {
+    marginRight: 12,
   },
   socialButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1A1A1A',
+    color: '#FFFFFF',
   },
   signUpContainer: {
     flexDirection: 'row',
@@ -361,19 +378,19 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   signUpText: {
-    color: '#777777',
+    color: '#D8BFD8',
     fontSize: 16,
   },
   signUpLink: {
-    color: '#007AFF',
+    color: '#8A2BE2',
     fontSize: 16,
     fontWeight: '600',
   },
 });
 
-// PropTypes validation
 LoginScreen.propTypes = {
   navigation: PropTypes.object.isRequired,
+  setIsLoggedIn: PropTypes.func.isRequired,
 };
 
 export default LoginScreen;

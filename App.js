@@ -1,9 +1,8 @@
-// App.js
 import 'react-native-gesture-handler';
 import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { SafeAreaView, StatusBar, StyleSheet } from 'react-native';
+import { View, StatusBar, StyleSheet } from 'react-native';
 
 // Import screens
 import SplashScreen from './src/screens/SplashScreen';
@@ -21,59 +20,54 @@ const Stack = createStackNavigator();
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
-  const [splashComplete, setSplashComplete] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Handle splash screen completion
-  const handleSplashComplete = () => {
-    setSplashComplete(true);
-    // Add a small delay for smooth transition
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 300);
-  };
-
-  // Minimum splash screen duration (optional)
   useEffect(() => {
-    const minSplashTime = setTimeout(() => {
-      if (splashComplete) {
-        setIsLoading(false);
-      }
-    }, 3000); // Minimum 3 seconds
+    // Simulate app loading process
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 3000);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
-    return () => clearTimeout(minSplashTime);
-  }, [splashComplete]);
-
-  // Show splash screen while loading
   if (isLoading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="light-content" backgroundColor="#1a0d1a" />
-        <SplashScreen onAnimationComplete={handleSplashComplete} />
-      </SafeAreaView>
-    );
+    return <SplashScreen />;
   }
 
-  // Main app navigation
   return (
     <NavigationContainer>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="RideBooking" component={RideBookingScreen} />
-        <Stack.Screen name="RidesList" component={RidesListScreen} />
-        <Stack.Screen name="BookingConfirmation" component={BookingConfirmationScreen} />
-        <Stack.Screen name="RideTracking" component={RideTrackingScreen} />
-        <Stack.Screen name="Profile" component={ProfileScreen} />
-        <Stack.Screen name="Settings" component={SettingsScreen} />
-        <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Navigator>
+        {!isLoggedIn ? (
+          <Stack.Screen 
+            name="Login" 
+            options={{ headerShown: false }}
+          >
+            {props => <LoginScreen {...props} setIsLoggedIn={setIsLoggedIn} />}
+          </Stack.Screen>
+        ) : (
+          // Main app screens
+          <>
+            <Stack.Screen 
+              name="Home" 
+              component={HomeScreen} 
+              options={{ headerShown: false }} 
+            />
+            <Stack.Screen name="RideBooking" component={RideBookingScreen} />
+            <Stack.Screen name="RidesList" component={RidesListScreen} />
+            <Stack.Screen 
+              name="RideDetails" 
+              component={RideDetailsPopupScreen} 
+              options={{ presentation: 'modal' }} 
+            />
+            <Stack.Screen name="BookingConfirmation" component={BookingConfirmationScreen} />
+            <Stack.Screen name="RideTracking" component={RideTrackingScreen} />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
+          </>
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-});
