@@ -1,4 +1,4 @@
-// src/screens/SplashScreen.js
+import PropTypes from 'prop-types';
 import React, { useEffect, useRef } from 'react';
 import {
   View,
@@ -22,16 +22,17 @@ const SplashScreen = ({ onAnimationComplete }) => {
 
   useEffect(() => {
     // Start wheel rotation animation
-    Animated.loop(
+    const wheelAnim = Animated.loop(
       Animated.timing(wheelRotation, {
         toValue: 1,
         duration: 1000,
         useNativeDriver: true,
       })
-    ).start();
+    );
+    wheelAnim.start();
 
     // Main animation sequence
-    Animated.sequence([
+    const mainAnim = Animated.sequence([
       // Logo appears with scale and fade
       Animated.parallel([
         Animated.timing(fadeAnim, {
@@ -83,13 +84,28 @@ const SplashScreen = ({ onAnimationComplete }) => {
         ]),
         { iterations: 2 }
       ),
-    ]).start(() => {
-      // Animation complete, wait a bit then proceed to main app
-      setTimeout(() => {
-        onAnimationComplete();
-      }, 500);
+    ]);
+
+    // Start the main animation
+    mainAnim.start(() => {
+      // Clean up animations
+      wheelAnim.stop();
+      mainAnim.stop();
+
+      // Only call onAnimationComplete if it's provided
+      if (typeof onAnimationComplete === 'function') {
+        setTimeout(() => {
+          onAnimationComplete();
+        }, 500);
+      }
     });
-  }, []);
+
+    // Clean up function
+    return () => {
+      wheelAnim.stop();
+      mainAnim.stop();
+    };
+  }, [onAnimationComplete]);
 
   const wheelRotate = wheelRotation.interpolate({
     inputRange: [0, 1],
@@ -454,5 +470,13 @@ const styles = StyleSheet.create({
     right: '20%',
   },
 });
+
+SplashScreen.propTypes = {
+  onAnimationComplete: PropTypes.func.isRequired
+};
+
+SplashScreen.defaultProps = {
+  onAnimationComplete: () => {} // Empty function as fallback
+};
 
 export default SplashScreen;

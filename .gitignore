@@ -2,6 +2,8 @@
 #
 .DS_Store
 
+src/config/supabase.js
+
 # Xcode
 #
 build/

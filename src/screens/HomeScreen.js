@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,13 +8,13 @@ import {
   Animated,
   StyleSheet,
   Dimensions,
-  Image,
+  Easing,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 const Tab = createBottomTabNavigator();
 
 // Placeholder components for tabs
@@ -38,19 +38,27 @@ const SettingsTab = () => (
 
 const HomeContent = ({ navigation }) => {
   const [showTour, setShowTour] = useState(true);
-  const fadeAnim = useState(new Animated.Value(0))[0];
-  const slideAnim = useState(new Animated.Value(50))[0];
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [160, 70],
+    extrapolate: 'clamp',
+  });
 
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 800,
+        easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
       Animated.timing(slideAnim, {
         toValue: 0,
-        duration: 600,
+        duration: 700,
+        easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
     ]).start();
@@ -77,42 +85,60 @@ const HomeContent = ({ navigation }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      {/* Header */}
-      <LinearGradient colors={['#FEFEFE', '#9AC1F0']} style={styles.header}>
-        <View style={styles.headerContent}>
-          <TouchableOpacity style={styles.menuButton}>
-            <Icon name="menu" size={24} color="#000000" />
-          </TouchableOpacity>
-          
-          <View style={styles.headerCenter}>
-            <Text style={styles.welcomeText}>Welcome back!</Text>
-            <Text style={styles.userName}>Sarah</Text>
-          </View>
-          
-          <View style={styles.headerRight}>
-            <TouchableOpacity 
-              style={styles.notificationButton}
-              onPress={() => navigation.navigate('Notifications')}
-            >
-              <Icon name="notifications-outline" size={24} color="#000000" />
-              <View style={styles.notificationBadge} />
+      {/* Animated Header */}
+      <Animated.View style={{ height: headerHeight, overflow: 'hidden' }}>
+        <LinearGradient colors={['#FEFEFE', '#9AC1F0']} style={[styles.header, { paddingTop: StatusBar.currentHeight + 10 }]}>
+          <View style={styles.headerContent}>
+            <TouchableOpacity style={styles.menuButton}>
+              <Icon name="menu" size={24} color="#000000" />
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.profileButton}
-              onPress={() => navigation.navigate('Profile')}
-            >
-              <LinearGradient colors={['#FC55CA', '#9AC1F0']} style={styles.profileGradient}>
-                <Text style={styles.profileText}>SA</Text>
-              </LinearGradient>
-            </TouchableOpacity>
+            
+            <View style={styles.headerCenter}>
+              <Text style={styles.welcomeText}>Welcome back!</Text>
+              <Text style={styles.userName}>Sarah</Text>
+            </View>
+            
+            <View style={styles.headerRight}>
+              <TouchableOpacity 
+                style={styles.notificationButton}
+                onPress={() => navigation.navigate('Notifications')}
+              >
+                <Icon name="notifications-outline" size={24} color="#000000" />
+                <View style={styles.notificationBadge} />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.profileButton}
+                onPress={() => navigation.navigate('Profile')}
+              >
+                <LinearGradient colors={['#FC55CA', '#9AC1F0']} style={styles.profileGradient}>
+                  <Icon name="person" size={20} color="#FEFEFE" />
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </LinearGradient>
+        </LinearGradient>
+      </Animated.View>
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <Animated.ScrollView 
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
+        scrollEventThrottle={16}
+      >
         {/* Tour Banner */}
         {showTour && (
-          <Animated.View style={[styles.tourBanner, { opacity: fadeAnim }]}>
+          <Animated.View 
+            style={[
+              styles.tourBanner, 
+              { 
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }]
+              }
+            ]}
+          >
             <LinearGradient colors={['#9AC1F0', '#FC55CA']} style={styles.tourGradient}>
               <TouchableOpacity
                 style={styles.tourCloseButton}
@@ -140,7 +166,24 @@ const HomeContent = ({ navigation }) => {
         )}
 
         {/* Quick Stats */}
-        <Animated.View style={[styles.statsContainer, { transform: [{ translateY: slideAnim }] }]}>
+        <Animated.View 
+          style={[
+            styles.statsContainer, 
+            { 
+              transform: [
+                { translateY: slideAnim },
+                {
+                  scale: scrollY.interpolate({
+                    inputRange: [0, 100],
+                    outputRange: [1, 0.95],
+                    extrapolate: 'clamp'
+                  })
+                }
+              ],
+              opacity: fadeAnim
+            }
+          ]}
+        >
           <View style={styles.statCard}>
             <Icon name="time-outline" size={24} color="#FC55CA" />
             <Text style={styles.statNumber}>12</Text>
@@ -284,7 +327,7 @@ const HomeContent = ({ navigation }) => {
         </TouchableOpacity>
 
         <View style={styles.bottomPadding} />
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 };
@@ -364,7 +407,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEFEFE',
   },
   header: {
-    paddingTop: 50,
     paddingBottom: 20,
     paddingHorizontal: 20,
   },
@@ -419,11 +461,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  profileText: {
-    color: '#FEFEFE',
-    fontWeight: 'bold',
-    fontSize: 16,
   },
   scrollView: {
     flex: 1,
